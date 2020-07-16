@@ -5,14 +5,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bentranter/turbolinks"
+	"github.com/bentranter/go-turbolinks"
 )
-
 
 func TestTurbolinks(t *testing.T) {
 	t.Run("turbolinks redirect", func(t *testing.T) {
 		handler := turbolinks.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, "/redirect", http.StatusFound)
+			http.Redirect(w, r, "http://localhost:3000/redirect", http.StatusFound)
 		}))
 
 		res := httptest.NewRecorder()
@@ -27,9 +26,35 @@ func TestTurbolinks(t *testing.T) {
 		}
 
 		cookieReq := &http.Request{Header: http.Header{"Cookie": res.HeaderMap["Set-Cookie"]}}
-		_, err := cookieReq.Cookie(turbolinks.TurbolinksLocation)
-		if err != nil {
+		if _, err := cookieReq.Cookie(turbolinks.TurbolinksLocation); err != nil {
 			t.Fatalf("expected session cookie to be set but got error %v", err.Error())
+		}
+	})
+
+	t.Run("turbolinks external redirect", func(t *testing.T) {
+		handler := turbolinks.Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "https://example.com", http.StatusFound)
+		}))
+
+		res := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/", nil)
+
+		// Set the header to make sure we hit the Turbolinks handler.
+		req.Header.Set("Turbolinks-Referrer", "http://localhost:3000/redirect")
+		handler.ServeHTTP(res, req)
+
+		if res.Code != http.StatusFound {
+			t.Fatalf("expected HTTP status %d but got %d", http.StatusFound, res.Code)
+		}
+
+		// The redirection cookie should not be set for external redirects.
+		cookieReq := &http.Request{Header: http.Header{"Cookie": res.HeaderMap["Set-Cookie"]}}
+		cookie, err := cookieReq.Cookie(turbolinks.TurbolinksLocation)
+		if err != http.ErrNoCookie {
+			t.Fatalf("expected http: named cookie not present but got %s", err.Error())
+		}
+		if cookie != nil {
+			t.Fatalf("expected session cookie to be nil for external redirect but got %#v", cookie)
 		}
 	})
 

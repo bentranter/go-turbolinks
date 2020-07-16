@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"html/template"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gorilla/securecookie"
@@ -15,8 +16,8 @@ const (
 	// current request was sent from Turbolinks.
 	TurbolinksReferrer = "Turbolinks-Referrer"
 
-	// TurbolinksLocation is the name of the session key that we use to handle
-	// redirect requests correctly.
+	// TurbolinksLocation is the name of the session key and cookie that we
+	// use to handle redirect requests correctly.
 	//
 	// We name it `_turbolinks_location` to be consistent with the name Rails
 	// gives to their session key that serves the same purpose.
@@ -73,7 +74,8 @@ func Middleware(h http.Handler) http.Handler {
 
 		// If the Turbolinks session is found, then redirect to the location
 		// specified by it.
-		if location := get(sc, r, TurbolinksLocation); location != "" {
+		location := get(sc, r, TurbolinksLocation)
+		if location != "" {
 			w.Header().Set("Turbolinks-Location", location)
 			del(sc, w, r, TurbolinksLocation)
 		}
@@ -98,7 +100,28 @@ func Middleware(h http.Handler) http.Handler {
 		// will force Turbolinks to update the URL (as push state history) for
 		// that redirect. We do this by setting a session on this request that
 		// we can check on the next request.
+		//
+		// However, if the location of the redirect is different than the
+		// referrer, it's an external redirect, so we don't do anything an
+		// just serve the request normally.
 		if location := rs.Header().Get("Location"); location != "" {
+			origin, err := url.Parse(referer)
+			if err != nil {
+				rs.SendResponse()
+				return
+			}
+
+			destination, err := url.Parse(location)
+			if err != nil {
+				rs.SendResponse()
+				return
+			}
+
+			if origin.Host != destination.Host {
+				rs.SendResponse()
+				return
+			}
+
 			set(sc, w, r, TurbolinksLocation, location)
 		}
 
