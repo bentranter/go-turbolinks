@@ -132,7 +132,9 @@ func (rw *responseStaller) Header() http.Header {
 // SendResponse writes the header to the underlying response writer, and
 // writes the response.
 func (rw *responseStaller) SendResponse() {
-	rw.w.WriteHeader(rw.code)
+	if rw.code != 0 {
+		rw.w.WriteHeader(rw.code)
+	}
 	rw.buf.WriteTo(rw.w)
 }
 
