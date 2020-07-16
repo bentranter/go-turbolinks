@@ -1,0 +1,19 @@
+{
+  "name": "examples",
+  "version": "0.0.1",
+  "description": "An example of how to use Turbolinks with Go.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ben Tranter",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@rails/ujs": "^6.0.3-2",
+    "turbolinks": "^5.2.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
+  }
+}

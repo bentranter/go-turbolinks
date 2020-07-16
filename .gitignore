@@ -1,0 +1,5 @@
+*.swp
+.DS_Store
+
+examples/node_modules
+examples/package-lock.json
