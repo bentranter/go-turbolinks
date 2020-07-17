@@ -33,9 +33,13 @@ func Middleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		referer := r.Header.Get(TurbolinksReferrer)
 		if referer == "" {
-			// Turbolinks isn't enabled, so don't do anything.
-			h.ServeHTTP(w, r)
-			return
+			// Check if this a remote submission.
+			requestedWith := r.Header.Get("X-Requested-With")
+			if requestedWith != "XMLHttpRequest" {
+				// Turbolinks isn't enabled, so don't do anything.
+				h.ServeHTTP(w, r)
+				return
+			}
 		}
 
 		// Check for a POST request. If we do encounter a POST request,
@@ -63,6 +67,8 @@ func Middleware(h http.Handler) http.Handler {
 				//
 				// Also, escape the location value so that it can't be used
 				// for frontend JavaScript injection.
+				//
+				// TODO Handle the "replace" directive like Rails does.
 				js := []byte(`Turbolinks.clearCache();Turbolinks.visit("` +
 					template.JSEscapeString(location) + `", {action: "advance"});`)
 				rs.Write(js)

@@ -14,7 +14,41 @@
     <li><a href="/one">A relative link to another page hosted here.</a></li>
     <li><a href="https://github.com">An external link.</a></li>
     <li><a href="/external-redirect">A relative link that redirects to an external link.</a></li>
+    <li><a href="/internal-redirect">A relative link that redirects to an internal link.</a></li>
   </ul>
   <h2>Forms</h2>
+  <ul>
+    <li>
+      <form action="/form" method="get" data-remote="true">
+        <label for="search">Local GET request. Note that this won't cause a Turbolinks redirection, and is a common source of confusion when starting out with Turbolinks.</label>
+        <input id="search" type="text" name="search"/>
+        <input type="submit" value="submit"/>
+      </form>
+      <div id="output">
+        <h3>Output:</h3>
+      </div>
+    </li>
+    <li>
+      <form action="https://github.com/search" method="get">
+        <label for="search">Remote GET request</label>
+        <input id="search" type="text" name="q"/>
+        <input type="submit" value="submit"/>
+      </form>
+    </li>
+    <li>
+      <form action="/form" method="post" data-remote="true">
+        <label for="search">Local POST request</label>
+        <input id="search" type="text" name="search"/>
+        <input type="submit" value="submit"/>
+      </form>
+    </li>
+    <li>
+      <form action="https://github.com/search" method="post">
+        <label for="search">Remote POST request</label>
+        <input id="search" type="text" name="q"/>
+        <input type="submit" value="submit"/>
+      </form>
+    </li>
+  </ul>
 </body>
 </html>
