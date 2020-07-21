@@ -1,17 +1,33 @@
 # Turbolinks
 
-Turbolinks middleware for Go.
-
-### Known Issues
-
-* The internal redirect doesn't correctly set the magic Turbolinks header such that the final URL is updated. For example, if you click a link to a handler that redirects to a normal page, the URL will set to the redirect handler instead of the final destination.
+[Turbolinks](https://github.com/turbolinks/turbolinks) middleware for Go.
 
 ### Usage
 
-Use it as middleware.
+Use it as you would any HTTP middleware.
+
+```go
+package main
+
+import (
+	"net/http"
+
+	"github.com/bentranter/go-turbolinks"
+)
+
+func main() {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, world!"))
+    })
+
+	http.ListenAndServe(":3000", turbolinks.Middleware(mux))
+}
+```
+
+See also the runnable example under the examples directory.
 
 ### Dependencies
 
 `turbolinks` depends on `github.com/gorilla/securecookie`.
-
-### Testing
