@@ -3,6 +3,7 @@ package turbolinks
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/securecookie"
 )
@@ -75,30 +76,13 @@ func (s *session) get(r *http.Request, key string) string {
 	return str
 }
 
-// delete deletes the key value pair from the session if it exists.
-func (s *session) delete(w http.ResponseWriter, r *http.Request, key string) {
-	cookie, err := r.Cookie(TurbolinksLocation)
-	if err != nil {
-		return
-	}
-
-	values := make(map[string]interface{})
-	if err := s.sc.Decode(TurbolinksLocation, cookie.Value, &values); err != nil {
-		return
-	}
-
-	delete(values, key)
-
-	encoded, err := s.sc.Encode(TurbolinksLocation, values)
-	if err != nil {
-		return
-	}
-
+// delete deletes the cookie associated with the session.
+func (s *session) delete(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     TurbolinksLocation,
-		Value:    encoded,
-		Path:     "/",
 		Secure:   isTLS(r),
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	})

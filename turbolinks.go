@@ -102,8 +102,8 @@ func isTurbolinks(w http.ResponseWriter, r *http.Request) (string, bool) {
 // false which indicates that Turbolinks processing should continue.
 func sessionContainsTurbolinksLocation(s *session, w http.ResponseWriter, r *http.Request) bool {
 	if location := s.get(r, TurbolinksLocation); location != "" {
+		s.delete(w, r)
 		w.Header().Set("Turbolinks-Location", location)
-		s.delete(w, r, TurbolinksLocation)
 		return true
 	}
 	return false
