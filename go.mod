@@ -1,4 +1,4 @@
-module github.com/bentranter/turbolinks
+module github.com/bentranter/go-turbolinks
 
 go 1.14
 
